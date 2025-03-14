@@ -82,3 +82,108 @@ const defaultCategories = [
 
 // Intializing states
 let expenses = [];
+let categories = [...defaultCategories];
+console.log(categories);
+let activeFilter = "all";
+let dateRange = { from: null, to: null };
+let searchTerm = "";
+let categoryChart = null;
+let monthlyChart = null;
+
+const init = () => {
+  // Setting date as default for date inputs
+  document.getElementById("date").valueAsDate = new Date();
+
+  // Load data from localStorage
+  loadData();
+
+  // Populates category dropdowns
+  populateCategoryDropdowns();
+
+  // Rendering expenses
+  renderExpenses();
+
+  // Update summary
+  updateSummary();
+
+  // Initialize charts
+  initCharts();
+
+  //Setup event listeners
+  setupEventListeners();
+};
+
+// Load data from localstorage
+const loadData = () => {
+  const savedExpenses = localStorage.getItem("expenses");
+  console.log(savedExpenses);
+  if (savedExpenses) {
+    expenses = JSON.parse(savedExpenses);
+  }
+
+  const savedCategories = localStorage.getItem("expensesCategories");
+  if (savedCategories) {
+    categories = JSON.parse(savedCategories);
+  }
+};
+
+// saving data to local storage
+const savedExpenses = () => {
+  localStorage.setItem("expenses", JSON.stringify(expenses));
+};
+
+const savedCategories = () => {
+  localStorage.setItem("expensesCategories", JSON.stringify(categories));
+};
+
+// Populates categories dropdown
+const populateCategoryDropdowns = () => {
+  // Clear existing options (except the first one for main select)
+  categorySelect.innerHTML = `<option value='' disabled selected>Select a category</option>`;
+  editCategorySelect.innerHTML = "";
+  categoryFilterSelect.innerHTML = `<option value='all'>All Categories</option>`;
+
+  // Adding categories to dropdowns
+  categories.forEach((category) => {
+    // Main category select
+    const option = document.createElement("option");
+    editOption.value = category.id;
+    option.textContent = category.name;
+    categorySelect.appendChild(option);
+
+    // Edit form category select
+    const editOption = document.createElement("option");
+    editOption.value = category.id;
+    editOption.textContent = category.name;
+    editCategorySelect.append(editOption);
+
+    // Filter Category select
+    const filterOption = document.createElement("option");
+    filterOption.value = category.id;
+    filterOption.textContent = category.name;
+    categoryFilterSelect.appendChild(filterOption);
+  });
+};
+
+// Format currency
+const formatCurrency = (amount) => {
+  return new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+  }).format(amount);
+};
+
+// Format Currency
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return (
+    date.toLocaleDateString("en-NG"),
+    {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }
+  );
+};
+
+// Getting
