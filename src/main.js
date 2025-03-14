@@ -186,4 +186,54 @@ const formatDate = (dateString) => {
   );
 };
 
-// Getting
+// Getting category name from ID
+const getCategoryName = (categoryId) => {
+  const category = categories.find((cat) => cat.id === categoryId);
+  return category ? category.name : category.id;
+};
+
+// Get category color from ID
+const getCategoryColor = (categoryId) => {
+  const category = categories.find((cat) => cat.id === categoryId);
+  return category ? category.color : "#cccccc";
+};
+
+// Filter expenses based on active filters
+const getFilteredExpenses = () => {
+  return expenses.filter((expense) => {
+    // Filter by category
+    if (activeFilter !== "all" && expense.category !== activeFilter) {
+      return false;
+    }
+
+    // Filtering by date range
+    if (dateRange.from || dateRange.to) {
+      const expenseDate = new Date(expense.date);
+      if (dateRange.from && expenseDate < dateRange.from) {
+        return false;
+      }
+    }
+
+    if (dateRange.to) {
+      const endDate = new Date(dateRange.from.to);
+      endDate.setHours(23, 59, 59, 999);
+      if (expenseDate > endDate) {
+        return false;
+      }
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      const description = expense.description.toLowerCase();
+      const category = getCategoryName(expense.category).toLowerCase();
+      if (
+        !description.includes(
+          searchTerm.toLowerCase() &&
+            !category.includes(searchTerm.toLowerCase())
+        )
+      ) {
+        return false;
+      }
+    }
+  });
+};
