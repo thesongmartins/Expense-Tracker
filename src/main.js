@@ -262,39 +262,114 @@ const renderExpenses = () => {
   } else {
     noExpensesMessage.style.display = "none";
     document.getElementById("expenses-table").style.display = "table";
+
+    // Add expenses to the table
+    filteredExpenses.forEach((expense) => {
+      const row = document.createElement("tr");
+
+      // Date cell
+      const dateCell = document.createElement("td");
+      dateCell.textContent = formatDate(expense.date);
+      row.appendChild(dateCell);
+
+      // Category cell
+      const categoryCell = document.createElement("td");
+      const categoryBadge = document.createElement("div");
+      categoryBadge.className = "category-badge";
+
+      const categoryDot = document.createElement("div");
+      categoryDot.className = "category-dot";
+      categoryDot.style.background = getCategoryColor(expense.category);
+
+      const categoryName = document.createElement("span");
+      categoryName.textContent = getCategoryName(expense.category);
+
+      categoryBadge.appendChild(categoryDot);
+      categoryBadge.appendChild(categoryName);
+      categoryCell.appendChild(categoryBadge);
+      row.appendChild(categoryCell);
+
+      // Description cell
+      const descriptionCell = document.createElement("td");
+      descriptionCell.textContent = expense.description;
+      row.appendChild(descriptionCell);
+
+      // Amount cell
+      const amountCell = document.createElement("td");
+      amountCell.textContent = formatCurrency(expense.amount);
+      amountCell.style.fontWeight = "500";
+      row.appendChild(amountCell);
+
+      // Actions cell
+      const actionCell = document.createElement("td");
+      const actionButtons = document.createElement("div");
+      actionButtons.className = "action-buttons";
+
+      // Edit button
+      const editBtn = document.createElement("button");
+      editBtn.className = "action-btn";
+      editBtn.innerHTML = `<i class="fas fa-edit"></i>`;
+      editBtn.addEventListener("click", () => openEditModal(expense));
+
+      // Delete Button
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "action-btn delete";
+      deleteBtn.innerHTML = `<i class="fas fa-trash"></i>`;
+      deleteBtn.addEventListener("click", () => openDeleteModal(expense.id));
+
+      actionButtons.appendChild(editBtn);
+      actionButtons.appendChild(deleteBtn);
+      actionButtons.appendChild(actionButtons);
+      row.appendChild(actionCell);
+
+      expenseList.appendChild(row);
+    });
+
+    expenseList.appendChild(row);
+  }
+};
+
+// Updating summary cards
+const updateSummary = () => {
+  const filteredExpenses = getFilteredExpenses();
+
+  // Calculating total amount
+  const totalAmount = filteredExpenses.reduce(
+    (sum, expense) => sum + Number.parseFloat(expense.amount),
+    0
+  );
+  totalAmountEl.textContent = formatCurrency(totalAmount);
+
+  // Update expense count
+  expenseCountEl.textContent = `${filteredExpenses.length} expenses ${
+    filteredExpenses.length !== 1 ? "s" : ""
+  }`;
+
+  // Calculate top category
+  const categoryTotals = {};
+  filteredExpenses.forEach((expense) => {
+    if (categoryTotals[expense.category]) {
+      categoryTotals[expense.category] += Number.parseFloat(expense.amount);
+    } else {
+      categoryTotals[expense.category] = Number.parseFloat(expense.amount);
+    }
+  });
+
+  let topCategoryId = "";
+  let maxAmount = 0;
+
+  for (const [categoryId, amount] of Object.entries(categoryTotals)) {
+    if (amount > maxAmount) {
+      maxAmount = amount;
+      topCategoryId = categoryId;
+    }
   }
 
-  // Add expenses to the table
-  filteredExpenses.forEach((expense) => {
-    const row = document.createElement("tr");
-
-    // Date cell
-    const dateCell = document.createElement("td");
-    dateCell.textContent = formatDate(expense.date);
-    row.appendChild(dateCell);
-
-    // Category cell
-    const categoryCell = document.createElement("td");
-    const categoryBadge = document.createElement("div");
-    categoryBadge.className = "category-badge";
-
-    const categoryDot = document.createElement("div");
-    categoryDot.className = "category-dot";
-    categoryDot.style.background = getCategoryColor(expense.category);
-
-    const categoryName = document.createElement("span");
-    categoryName.textContent = getCategoryName(expense.category);
-
-    categoryBadge.appendChild(categoryDot);
-    categoryBadge.appendChild(categoryName);
-    categoryCell.appendChild(categoryBadge);
-    row.appendChild(categoryCell);
-
-    // Description cell
-    const descriptionCell = document.createElement("td");
-    descriptionCell.textContent = expense.description;
-    row.appendChild(descriptionCell);
-
-    // Amount cell
-  });
+  if (topCategoryId) {
+    topCategoryEl.textContent = getCategoryName(topCategoryId);
+    topCategoryAmountEl.textContent = formatCurrency(maxAmount);
+  } else {
+    topCategoryEl.textContent = "N/A";
+    topCategoryAmountEl.textContent = "0.00";
+  }
 };
