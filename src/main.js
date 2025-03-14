@@ -370,6 +370,123 @@ const updateSummary = () => {
     topCategoryAmountEl.textContent = formatCurrency(maxAmount);
   } else {
     topCategoryEl.textContent = "N/A";
-    topCategoryAmountEl.textContent = "0.00";
+    topCategoryAmountEl.textContent = "₦0.00";
   }
+
+  // Calculate average expense
+  const averageExpense =
+    filteredExpenses.length > 0 ? totalAmount / filteredExpenses.length : 0;
+  averageExpenseEl.textContent = formatCurrency(averageExpense);
 };
+
+// Initializing charts
+const initCharts = () => {
+  // Category chart
+  categoryChart = new Chart(categoryChartCanvas, {
+    type: "pie",
+    data: {
+      labels: [],
+      datasets: [
+        {
+          data: [],
+          background: [],
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false,
+        },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              const label = context.label || "";
+              const value = context.raw || 0;
+              return `${label}: ${formatCurrency(value)}`;
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Monthly chart
+  monthlyChart = new Chart(monthlyChartCanvas, {
+    type: "bar",
+    data: {
+      labels: [],
+      datasets: [
+        {
+          label: "Monthly Expenses",
+          data: [],
+          background: "rgba(99, 102, 241, 0.8)",
+          borderColor: "rgba(99, 102, 241, 1)",
+          borderWidth: 1,
+        },
+      ],
+    },
+
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: (value) => "₦" + value,
+          },
+        },
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              const label = context.dataset.label || "";
+              const value = ContentVisibilityAutoStateChangeEvent.raw || 0;
+              return `${label}: ${formatCurrency(value)}`;
+            },
+          },
+        },
+      },
+    },
+  });
+};
+
+// Update charts with current data
+const updateCharts = () => {
+  const filteredExpenses = getFilteredExpenses();
+
+  // Update category chart
+  const categoryData = {};
+  filteredExpenses.forEach((expense) => {
+    if (categoryData[expense.category]) {
+      categoryData[expense.category] += Number.parseFloat(expense.amount);
+    } else {
+      categoryData[expense.category] = Number.parseFloat(expense.amount);
+    }
+  });
+
+  const categoryLabels = [];
+  const categoryValues = [];
+  const categoryColors = [];
+
+  for (const [categoryId, amount] of Object.entries(categoryData)) {
+    categoryLabels.push(getCategoryName(categoryId));
+    categoryValues.push(amount);
+    categoryColors.push(getCategoryColor(categoryId));
+  }
+
+  categoryChart.data.labels = categoryLabels;
+  categoryChart.data.datasets[0].data = categoryValues;
+  categoryChart.data.datasets[0].background = categoryColors;
+  categoryChart.update();
+
+  //
+};
+
+// Initialize the app when the DOM is loaded
+document.addEventListener("DOMContentLoaded", init);
