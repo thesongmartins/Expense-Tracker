@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./src/style.css" />
     <title>Expense Tracker</title>
   </head>
   <body>
@@ -56,6 +57,53 @@
               <button type="submit" class="btn btn-primary">Add Expense</button>
             </div>
           </form>
+        </div>
+
+        <!-- Right side - Expense List and Summary -->
+        <div class="content-container">
+          <!-- Summary Cards -->
+          <div class="summary-container">
+            <div class="summary-card">
+              <h3>Total Expense</h3>
+              <p id="total-amount">NGN0.00</p>
+              <small id="expense-count">0 expenses</small>
+            </div>
+
+            <div class="summary-card">
+              <h3>Top Category</h3>
+              <p id="top-category">N/A</p>
+              <small id="top-category-amount">NGN0.00</small>
+            </div>
+
+            <div class="summary-card">
+              <h3>Average Expense</h3>
+              <p id="average-expense">NGN0.00</p>
+              <small>Per transaction</small>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="filter-container">
+            <div class="filter-group">
+              <label for="category-filter">Filter by:</label>
+              <select name="category-filter" id="category-filter">
+                <option value="all">All Categories</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="date-filter">Date Range:</label>
+              <div class="date-range">
+                <input type="date" id="date-from" placeholder="From" /><span
+                  >to</span
+                >
+                <input type="date" id="date-to" placeholder="To" />
+                <button id="clear-date-filter" class="btn btn-small">
+                  Clear
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
