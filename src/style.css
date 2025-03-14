@@ -135,12 +135,12 @@ textarea {
 }
 
 .btn-primary {
-  background: var(--primary-color);
+  background: var(--text-color);
   color: white;
   width: 100%;
 }
 .btn-primary:hover {
-  background: var(--danger-hover);
+  background: var(--text-muted);
 }
 
 .btn-small {
@@ -400,5 +400,5 @@ td {
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
-  border: 1px solid var(--border-color);
+  border-radius: 1px solid var(--border-color);
 }
