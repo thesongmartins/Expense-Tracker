@@ -103,10 +103,68 @@
                 </button>
               </div>
             </div>
+
+            <div class="filter-group">
+              <label for="search"> Search: </label>
+              <input type="text" id="search" placeholder="Search expenses..." />
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="list">List View</button>
+            <button class="tab-btn" data-tab="chart">Chart View</button>
+          </div>
+
+          <!-- Tab Content -->
+          <div class="tab-content">
+            <!-- List View -->
+            <div class="list-view" class="tab-pane active">
+              <table id="expense-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="expense-list">
+                  <!-- Populated using Javascript -->
+                </tbody>
+              </table>
+              <div id="no-expenses-message" class="empty-message">
+                No expenses yet. Add your first expense!
+              </div>
+            </div>
+
+            <!-- Chart View -->
+            <div id="chart-view" class="tab-pane">
+              <div class="chart-tabs">
+                <button class="chart-tab-btn active" data-chart="category">
+                  By Category
+                </button>
+                <button class="chart-tab-btn" data-chart="monthly">
+                  Monthly Trend
+                </button>
+              </div>
+
+              <div class="chart-container">
+                <canvas id="category-chart"></canvas>
+                <canvas id="monthly-chart" style="display: none"></canvas>
+              </div>
+
+              <div id="chart-legend" class="chart-legend">
+                <!-- Populated using Javascript -->
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Add Category Modal -->
     <script
       src="https://kit.fontawesome.com/5885fdb321.js"
       crossorigin="anonymous"
