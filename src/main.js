@@ -485,7 +485,70 @@ const updateCharts = () => {
   categoryChart.data.datasets[0].background = categoryColors;
   categoryChart.update();
 
-  //
+  // Update chart legend
+  chartLegend.innerHTML = "";
+  if (categoryLabels.length > 0) {
+    categoryLabels.forEach((label, index) => {
+      const legendItem = document.createElement("div");
+      legendItem.className = "legend-item";
+
+      const colorLabel = document.createElement("div");
+      colorLabel.className = "legend-color";
+
+      const dot = document.createElement("div");
+      dot.className = "legend-dot";
+      dot.style.background = categoryColors[index];
+
+      const name = document.createElement("span");
+      name.textContent = label;
+
+      colorLabel.appendChild(dot);
+      colorLabel.appendChild(name);
+
+      const value = document.createElement("span");
+      value.textContent = formatCurrency(categoryValues[index]);
+
+      legendItem.appendChild(colorLabel);
+      legendItem.appendChild(value);
+
+      chartLegend.appendChild(legendItem);
+    });
+  }
+
+  // Update monthly chart
+  const monthlyData = {};
+  filteredExpenses.forEach((expense) => {
+    const date = new Date(expense.date);
+    const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
+
+    if (monthlyData[monthYear]) {
+      monthlyData[monthYear] += Number.parseFloat(expense.amount);
+    } else {
+      monthlyData[monthYear] = Number.parseFloat(expense.amount);
+    }
+  });
+
+  const monthlyLabels = [];
+  const monthlyValues = [];
+
+  // Sorting by date
+  const sortedMonths = Object.keys(monthlyData).sort();
+
+  sortedMonths.forEach((monthYear) => {
+    const [year, month] = monthYear.split("-");
+    const date = new Date(Number.parseInt(year), Number.parseInt(month) - 1, 1);
+    const label = date.toLocaleDateString("en-NG", {
+      month: "short",
+      year: "numeric",
+    });
+
+    monthlyLabels.push(label);
+    monthlyValues.push(monthlyData[monthYear]);
+  });
+
+  monthlyChart.data.labels = monthlyLabels;
+  monthlyChart.data.datasets[0].data = monthlyValues;
+  monthlyChart.update();
 };
 
 // Initialize the app when the DOM is loaded
