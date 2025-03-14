@@ -235,5 +235,66 @@ const getFilteredExpenses = () => {
         return false;
       }
     }
+    return true;
+  });
+};
+
+// Render expenses in the table
+const renderExpenses = () => {
+  const filteredExpenses = getFilteredExpenses();
+  console.log(filteredExpenses);
+
+  // Clear the expense list
+  expenseList.innerHTML = "";
+
+  // Show/hid no expense message
+  if (filteredExpenses.length === 0) {
+    noExpensesMessage.style.display = "block";
+    document.getElementById("expenses-table").style.display = "none";
+
+    // Update message based on whether there are any expenses
+    if (expenses.length === 0) {
+      noExpensesMessage.textContent =
+        "No expenses yet, Add your first expense!";
+    } else {
+      noExpensesMessage.textContent = "No expenses match your search criteria.";
+    }
+  } else {
+    noExpensesMessage.style.display = "none";
+    document.getElementById("expenses-table").style.display = "table";
+  }
+
+  // Add expenses to the table
+  filteredExpenses.forEach((expense) => {
+    const row = document.createElement("tr");
+
+    // Date cell
+    const dateCell = document.createElement("td");
+    dateCell.textContent = formatDate(expense.date);
+    row.appendChild(dateCell);
+
+    // Category cell
+    const categoryCell = document.createElement("td");
+    const categoryBadge = document.createElement("div");
+    categoryBadge.className = "category-badge";
+
+    const categoryDot = document.createElement("div");
+    categoryDot.className = "category-dot";
+    categoryDot.style.background = getCategoryColor(expense.category);
+
+    const categoryName = document.createElement("span");
+    categoryName.textContent = getCategoryName(expense.category);
+
+    categoryBadge.appendChild(categoryDot);
+    categoryBadge.appendChild(categoryName);
+    categoryCell.appendChild(categoryBadge);
+    row.appendChild(categoryCell);
+
+    // Description cell
+    const descriptionCell = document.createElement("td");
+    descriptionCell.textContent = expense.description;
+    row.appendChild(descriptionCell);
+
+    // Amount cell
   });
 };
