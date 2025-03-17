@@ -5,255 +5,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Expense Tracker</title>
     <link rel="stylesheet" href="/src/style.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
     <div class="container">
       <h1>Expense Tracker</h1>
 
-      <div class="app-container">
-        <!-- Left side - Add Expense Form -->
-        <div class="form-container">
-          <h2>Add New Expense</h2>
-          <form id="expense-form">
-            <div class="form-group">
-              <label for="amount">Amount ($)</label>
-              <input
-                type="number"
-                id="amount"
-                step="0.01"
-                min="0.01"
-                required
-                placeholder="0.00"
-              />
-            </div>
+      <div class="balance-container">
+        <h2>Your Balance</h2>
+        <h2 id="balance">$0.00</h2>
 
-            <div class="form-group">
-              <label for="category">Category</label>
-              <div class="select-with-button">
-                <select id="category" required>
-                  <option value="" disabled selected>Select a category</option>
-                  <!-- Categories will be populated by JavaScript -->
-                </select>
-                <button type="button" id="add-category-btn" class="icon-button">
-                  <i class="fas fa-plus"></i>
-                </button>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="description">Description</label>
-              <textarea
-                id="description"
-                required
-                placeholder="What was this expense for?"
-              ></textarea>
-            </div>
-
-            <div class="form-group">
-              <label for="date">Date</label>
-              <input type="date" id="date" required />
-            </div>
-
-            <button type="submit" class="btn btn-primary">Add Expense</button>
-          </form>
-        </div>
-
-        <!-- Right side - Expense List and Summary -->
-        <div class="content-container">
-          <!-- Summary Cards -->
-          <div class="summary-container">
-            <div class="summary-card">
-              <h3>Total Expenses</h3>
-              <p id="total-amount">$0.00</p>
-              <small id="expense-count">0 expenses</small>
-            </div>
-
-            <div class="summary-card">
-              <h3>Top Category</h3>
-              <p id="top-category">N/A</p>
-              <small id="top-category-amount">$0.00</small>
-            </div>
-
-            <div class="summary-card">
-              <h3>Average Expense</h3>
-              <p id="average-expense">$0.00</p>
-              <small>Per transaction</small>
-            </div>
+        <div class="income-expense-container">
+          <div>
+            <h3>Income</h3>
+            <p id="income" class="money plus">$0.00</p>
           </div>
-
-          <!-- Filter Controls -->
-          <div class="filter-container">
-            <div class="filter-group">
-              <label for="category-filter">Filter by:</label>
-              <select id="category-filter">
-                <option value="all">All Categories</option>
-                <!-- Categories will be populated by JavaScript -->
-              </select>
-            </div>
-
-            <div class="filter-group">
-              <label for="date-filter">Date Range:</label>
-              <div class="date-range">
-                <input type="date" id="date-from" placeholder="From" />
-                <span>to</span>
-                <input type="date" id="date-to" placeholder="To" />
-                <button id="clear-date-filter" class="btn btn-small">
-                  Clear
-                </button>
-              </div>
-            </div>
-
-            <div class="filter-group">
-              <label for="search">Search:</label>
-              <input type="text" id="search" placeholder="Search expenses..." />
-            </div>
-          </div>
-
-          <!-- Tabs -->
-          <div class="tabs">
-            <button class="tab-btn active" data-tab="list">List View</button>
-            <button class="tab-btn" data-tab="chart">Chart View</button>
-          </div>
-
-          <!-- Tab Content -->
-          <div class="tab-content">
-            <!-- List View -->
-            <div id="list-view" class="tab-pane active">
-              <table id="expenses-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Category</th>
-                    <th>Description</th>
-                    <th>Amount</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="expense-list">
-                  <!-- Expenses will be populated by JavaScript -->
-                </tbody>
-              </table>
-              <div id="no-expenses-message" class="empty-message">
-                No expenses yet. Add your first expense!
-              </div>
-            </div>
-
-            <!-- Chart View -->
-            <div id="chart-view" class="tab-pane">
-              <div class="chart-tabs">
-                <button class="chart-tab-btn active" data-chart="category">
-                  By Category
-                </button>
-                <button class="chart-tab-btn" data-chart="monthly">
-                  Monthly Trend
-                </button>
-              </div>
-
-              <div class="chart-container">
-                <canvas id="category-chart"></canvas>
-                <canvas id="monthly-chart" style="display: none"></canvas>
-              </div>
-
-              <div id="chart-legend" class="chart-legend">
-                <!-- Legend will be populated by JavaScript -->
-              </div>
-            </div>
+          <div>
+            <h3>Expense</h3>
+            <p id="expense" class="money minus">$0.00</p>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Add Category Modal -->
-    <div id="category-modal" class="modal">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Add New Category</h2>
-        <form id="category-form">
-          <div class="form-group">
-            <label for="category-name">Category Name</label>
+      <div class="form-container">
+        <h3>Add Transaction</h3>
+        <form id="transaction-form">
+          <div class="form-control">
+            <label for="description">Description</label>
             <input
               type="text"
-              id="category-name"
+              id="description"
+              placeholder="Enter description..."
               required
-              placeholder="e.g., Groceries"
             />
           </div>
-
-          <div class="form-group">
-            <label for="category-color">Color</label>
-            <div class="color-picker">
-              <input type="color" id="category-color" value="#6366f1" />
-              <div id="color-preview" class="color-preview"></div>
-            </div>
-          </div>
-
-          <button type="submit" class="btn btn-primary">Add Category</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Edit Expense Modal -->
-    <div id="edit-modal" class="modal">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Edit Expense</h2>
-        <form id="edit-form">
-          <input type="hidden" id="edit-id" />
-          <div class="form-group">
-            <label for="edit-amount">Amount ($)</label>
+          <div class="form-control">
+            <label for="amount">Amount</label>
             <input
               type="number"
-              id="edit-amount"
+              id="amount"
+              placeholder="Enter amount..."
               step="0.01"
-              min="0.01"
               required
             />
+            <small>Negative - expense, Positive - income</small>
           </div>
-
-          <div class="form-group">
-            <label for="edit-category">Category</label>
-            <select id="edit-category" required>
-              <!-- Categories will be populated by JavaScript -->
+          <div class="form-control">
+            <label for="category">Category</label>
+            <select id="category" required>
+              <option value="">Select category...</option>
+              <option value="salary">Salary</option>
+              <option value="freelance">Freelance</option>
+              <option value="gifts">Gifts</option>
+              <option value="food">Food</option>
+              <option value="rent">Rent</option>
+              <option value="utilities">Utilities</option>
+              <option value="entertainment">Entertainment</option>
+              <option value="transportation">Transportation</option>
+              <option value="shopping">Shopping</option>
+              <option value="other">Other</option>
             </select>
           </div>
-
-          <div class="form-group">
-            <label for="edit-description">Description</label>
-            <textarea id="edit-description" required></textarea>
+          <div class="form-control">
+            <label for="date">Date</label>
+            <input type="date" id="date" required />
           </div>
-
-          <div class="form-group">
-            <label for="edit-date">Date</label>
-            <input type="date" id="edit-date" required />
-          </div>
-
-          <button type="submit" class="btn btn-primary">Update Expense</button>
+          <button class="btn" type="submit">Add Transaction</button>
         </form>
       </div>
-    </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div id="delete-modal" class="modal">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Confirm Delete</h2>
-        <p>
-          Are you sure you want to delete this expense? This action cannot be
-          undone.
-        </p>
-        <input type="hidden" id="delete-id" />
-        <div class="modal-actions">
-          <button id="cancel-delete" class="btn">Cancel</button>
-          <button id="confirm-delete" class="btn btn-danger">Delete</button>
+      <div class="history-container">
+        <h3>History</h3>
+        <ul id="transaction-list" class="list"></ul>
+      </div>
+
+      <div class="charts-container">
+        <h3>Monthly Report</h3>
+        <div class="chart-tabs">
+          <button class="chart-tab active" data-chart="expense-categories">
+            Expense Categories
+          </button>
+          <button class="chart-tab" data-chart="monthly-summary">
+            Monthly Summary
+          </button>
+        </div>
+        <div class="chart-container">
+          <canvas id="expense-categories-chart"></canvas>
+          <canvas id="monthly-summary-chart" style="display: none"></canvas>
         </div>
       </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="js/app.js"></script>
   </body>
 </html>
