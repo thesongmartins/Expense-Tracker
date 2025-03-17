@@ -1,176 +1,75 @@
-import { getCategoryName } from "../public/categories.js";
-import { getFilteredExpenses } from "../public/expenses.js";
-import { initCharts, updateCharts } from "./charts.js";
-import { formatCurrency } from "../public/utils.js";
-import { renderExpenses } from "../public/renderExpenses.js";
+import {
+  getTransactions,
+  addTransaction,
+  deleteTransaction,
+} from "../public/transaction.js";
+import { updateUI, initUI } from "../public/ui.js";
+import { updateCharts } from "../public/charts.js";
+import { displayStorageStatus } from "../public/storageCheck.js";
+console.log("Hello from main.js");
+// Initialize the application
+function init() {
+  console.log("Initializing the app...");
+  // Check storage availability
+  displayStorageStatus();
 
-// DOM Elements
-const elements = {
-  expenseForm: document.getElementById("expense-form"),
-  categorySelect: document.getElementById("category"),
-  editCategorySelect: document.getElementById("edit-category"),
-  categoryFilterSelect: document.getElementById("category-filter"),
-  addCategoryBtn: document.getElementById("add-category-btn"),
-  categoryModal: document.getElementById("category-modal"),
-  categoryForm: document.getElementById("category-form"),
-  colorInput: document.getElementById("category-color"),
-  colorPreview: document.getElementById("color-preview"),
-  totalAmountEl: document.getElementById("total-amount"),
-  expenseCountEl: document.getElementById("expense-count"),
-  topCategoryEl: document.getElementById("top-category"),
-  topCategoryAmountEl: document.getElementById("top-category-amount"),
-  averageExpenseEl: document.getElementById("average-expense"),
-  searchInput: document.getElementById("search"),
-  dateFromInput: document.getElementById("date-from"),
-  dateToInput: document.getElementById("date-to"),
-  clearDateFilterBtn: document.getElementById("clear-date-filter"),
-  editModal: document.getElementById("edit-modal"),
-  editForm: document.getElementById("edit-form"),
-  deleteModal: document.getElementById("delete-modal"),
-  confirmDeleteBtn: document.getElementById("confirm-delete"),
-  cancelDeleteBtn: document.getElementById("cancel-delete"),
-  closeButtons: document.querySelectorAll(".close"),
-};
-
-const defaultCategories = [
-  { id: "food", name: "Food & Dining", color: "#FF5733" },
-  { id: "transportation", name: "Transportation", color: "#33A8FF" },
-  { id: "housing", name: "Housing", color: "#33FF57" },
-  { id: "entertainment", name: "Entertainment", color: "#F033FF" },
-  { id: "utilities", name: "Utilities", color: "#FFB533" },
-  { id: "healthcare", name: "Healthcare", color: "#33FFF1" },
-  { id: "shopping", name: "Shopping", color: "#FF33A8" },
-  { id: "other", name: "Other", color: "#8C33FF" },
-];
-
-// Initializing states
-
-let categories = [...defaultCategories];
-export { categories };
-
-let expenses = [];
-// Save & Load Data
-const storage = {
-  save: {
-    expenses: () => localStorage.setItem("expenses", JSON.stringify(expenses)),
-    categories: () =>
-      localStorage.setItem("expensesCategories", JSON.stringify(categories)),
-  },
-  load: () => {
-    expenses = JSON.parse(localStorage.getItem("expenses")) || [];
-    const storedCategories = JSON.parse(
-      localStorage.getItem("expensesCategories")
-    );
-    categories =
-      storedCategories && storedCategories.length
-        ? storedCategories
-        : [...defaultCategories];
-  },
-};
-
-// Populate category dropdowns
-const populateCategoryDropdowns = () => {
-  elements.categorySelect.innerHTML = `<option value='' disabled selected>Select a category</option>`;
-  elements.editCategorySelect.innerHTML = "";
-  elements.categoryFilterSelect.innerHTML = `<option value='all'>All Categories</option>`;
-
-  categories.forEach((category) => {
-    const option = new Option(category.name, category.id);
-    elements.categorySelect.appendChild(option);
-    elements.editCategorySelect.appendChild(option.cloneNode(true));
-    elements.categoryFilterSelect.appendChild(option.cloneNode(true));
+  // Initialize UI
+  initUI({
+    onAddTransaction: handleAddTransaction,
+    onDeleteTransaction: handleDeleteTransaction,
+    onChartTabClick: handleChartTabClick,
   });
-};
 
-// Update summary cards
-const updateSummary = () => {
-  const filteredExpenses = getFilteredExpenses(expenses);
-  const totalAmount = filteredExpenses.reduce(
-    (sum, expense) => sum + expense.amount,
-    0
+  // Load and display transactions
+  const transactions = getTransactions();
+  updateUI(transactions);
+
+  // Update charts
+  updateCharts(transactions);
+
+  // Log to verify transactions are loaded
+  console.log("Loaded transactions:", transactions);
+}
+
+// Handle adding a new transaction
+function handleAddTransaction(transaction) {
+  const newTransaction = addTransaction(transaction);
+  console.log("Transaction added:", newTransaction);
+
+  const transactions = getTransactions();
+  updateUI(transactions);
+  updateCharts(transactions);
+}
+
+// Handle deleting a transaction
+function handleDeleteTransaction(id) {
+  deleteTransaction(id);
+  const transactions = getTransactions();
+  updateUI(transactions);
+  updateCharts(transactions);
+}
+
+// Handle chart tab clicks
+function handleChartTabClick(chartId) {
+  const expenseCategoriesChart = document.getElementById(
+    "expense-categories-chart"
   );
-  elements.totalAmountEl.textContent = formatCurrency(totalAmount);
+  const monthlySummaryChart = document.getElementById("monthly-summary-chart");
 
-  elements.expenseCountEl.textContent = `${filteredExpenses.length} expense${
-    filteredExpenses.length !== 1 ? "s" : ""
-  }`;
-
-  const categoryTotals = filteredExpenses.reduce(
-    (acc, { category, amount }) => {
-      acc[category] = (acc[category] || 0) + amount;
-      return acc;
-    },
-    {}
-  );
-
-  const topCategoryId = Object.keys(categoryTotals).reduce(
-    (a, b) => (categoryTotals[a] > categoryTotals[b] ? a : b),
-    ""
-  );
-
-  if (topCategoryId) {
-    elements.topCategoryEl.textContent = getCategoryName(topCategoryId);
-    elements.topCategoryAmountEl.textContent = formatCurrency(
-      categoryTotals[topCategoryId]
-    );
+  if (chartId === "expense-categories") {
+    expenseCategoriesChart.style.display = "block";
+    monthlySummaryChart.style.display = "none";
   } else {
-    elements.topCategoryEl.textContent = "N/A";
-    elements.topCategoryAmountEl.textContent = formatCurrency(0);
+    expenseCategoriesChart.style.display = "none";
+    monthlySummaryChart.style.display = "block";
   }
+}
 
-  elements.averageExpenseEl.textContent = formatCurrency(
-    filteredExpenses.length ? totalAmount / filteredExpenses.length : 0
-  );
-};
-
-// Add event listeners
-const setupEventListeners = () => {
-  elements.expenseForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    addExpense({
-      amount: Number(document.getElementById("amount").value),
-      category: document.getElementById("category").value,
-      description: document.getElementById("description").value,
-      date: document.getElementById("date").value,
-    });
-    e.target.reset();
-    document.getElementById("date").valueAsDate = new Date();
-  });
-
-  elements.colorInput.addEventListener("input", () => {
-    elements.colorPreview.style.background = elements.colorInput.value;
-  });
-
-  elements.confirmDeleteBtn.addEventListener("click", () => {
-    deleteExpense(document.getElementById("delete-id").value);
-    elements.deleteModal.style.display = "none";
-  });
-
-  elements.cancelDeleteBtn.addEventListener("click", () => {
-    elements.deleteModal.style.display = "none";
-  });
-
-  elements.closeButtons.forEach((button) =>
-    button.addEventListener("click", closeModals)
-  );
-
-  elements.searchInput.addEventListener("input", () => {
-    searchTerm = elements.searchInput.value;
-    renderExpenses(ex);
-    updateSummary();
-  });
-};
-
-// Initialize app
-const init = () => {
-  document.getElementById("date").valueAsDate = new Date();
-  storage.load();
-  populateCategoryDropdowns();
-  renderExpenses(expenses);
-  updateSummary();
-  initCharts();
-  updateCharts();
-  setupEventListeners();
-};
-
-document.addEventListener("DOMContentLoaded", init);
+// Initialize the app when DOM is loaded
+// document.addEventListener("DOMContentLoaded", () => {
+//   console.log("DOM loaded");
+//   init();
+// });
+window.onload = init;
+console.log("DOM loaded");
+init();

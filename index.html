@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Expense Tracker</title>
-    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="./src/style.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
@@ -94,8 +94,12 @@
           <canvas id="monthly-summary-chart" style="display: none"></canvas>
         </div>
       </div>
+
+      <div id="storage-status" class="storage-status">
+        <p>Local Storage: <span id="storage-available">Checking...</span></p>
+      </div>
     </div>
 
-    <script type="module" src="js/app.js"></script>
+    <script type="module" src="/src/main.js"></script>
   </body>
 </html>

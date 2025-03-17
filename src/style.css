@@ -237,3 +237,17 @@ select {
     padding-bottom: 20px;
   }
 }
+
+.storage-status {
+  background-color: white;
+  box-shadow: var(--box-shadow);
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.storage-status p {
+  margin: 0;
+}
