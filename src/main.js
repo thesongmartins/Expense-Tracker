@@ -1,5 +1,5 @@
-import Chart from "chart.js/auto";
-import { color } from "chart.js/helpers";
+import { initCharts, updateCharts } from "./charts.js";
+import { formatCurrency, formatDate } from "./utils.js";
 
 // DOM Elements
 const expenseForm = document.getElementById("expense-form");
@@ -49,7 +49,7 @@ const defaultCategories = [
     color: "#33A8FF",
   },
   {
-    id: "hosuing",
+    id: "housing",
     name: "Housing",
     color: "#33FF57",
   },
@@ -66,7 +66,7 @@ const defaultCategories = [
   {
     id: "healthcare",
     name: "Health Care",
-    color: "###FFF1",
+    color: "#FFF1",
   },
   {
     id: "shopping",
@@ -80,38 +80,13 @@ const defaultCategories = [
   },
 ];
 
-// Intializing states
+// Initializing states
 let expenses = [];
 let categories = [...defaultCategories];
 console.log(categories);
 let activeFilter = "all";
 let dateRange = { from: null, to: null };
 let searchTerm = "";
-let categoryChart = null;
-let monthlyChart = null;
-
-const init = () => {
-  // Setting date as default for date inputs
-  document.getElementById("date").valueAsDate = new Date();
-
-  // Load data from localStorage
-  loadData();
-
-  // Populates category dropdowns
-  populateCategoryDropdowns();
-
-  // Rendering expenses
-  renderExpenses();
-
-  // Update summary
-  updateSummary();
-
-  // Initialize charts
-  initCharts();
-
-  //Setup event listeners
-  setupEventListeners();
-};
 
 // Load data from localstorage
 const loadData = () => {
@@ -128,11 +103,11 @@ const loadData = () => {
 };
 
 // saving data to local storage
-const savedExpenses = () => {
+const saveExpenses = () => {
   localStorage.setItem("expenses", JSON.stringify(expenses));
 };
 
-const savedCategories = () => {
+const saveCategories = () => {
   localStorage.setItem("expensesCategories", JSON.stringify(categories));
 };
 
@@ -147,7 +122,7 @@ const populateCategoryDropdowns = () => {
   categories.forEach((category) => {
     // Main category select
     const option = document.createElement("option");
-    editOption.value = category.id;
+    option.value = category.id;
     option.textContent = category.name;
     categorySelect.appendChild(option);
 
@@ -166,25 +141,8 @@ const populateCategoryDropdowns = () => {
 };
 
 // Format currency
-const formatCurrency = (amount) => {
-  return new Intl.NumberFormat("en-NG", {
-    style: "currency",
-    currency: "NGN",
-  }).format(amount);
-};
 
-// Format Currency
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  return (
-    date.toLocaleDateString("en-NG"),
-    {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }
-  );
-};
+// Format date
 
 // Getting category name from ID
 const getCategoryName = (categoryId) => {
@@ -212,13 +170,12 @@ const getFilteredExpenses = () => {
       if (dateRange.from && expenseDate < dateRange.from) {
         return false;
       }
-    }
-
-    if (dateRange.to) {
-      const endDate = new Date(dateRange.from.to);
-      endDate.setHours(23, 59, 59, 999);
-      if (expenseDate > endDate) {
-        return false;
+      if (dateRange.to) {
+        const endDate = new Date(dateRange.to);
+        endDate.setHours(23, 59, 59, 999);
+        if (expenseDate > endDate) {
+          return false;
+        }
       }
     }
 
@@ -227,10 +184,8 @@ const getFilteredExpenses = () => {
       const description = expense.description.toLowerCase();
       const category = getCategoryName(expense.category).toLowerCase();
       if (
-        !description.includes(
-          searchTerm.toLowerCase() &&
-            !category.includes(searchTerm.toLowerCase())
-        )
+        !description.includes(searchTerm.toLowerCase()) &&
+        !category.includes(searchTerm.toLowerCase())
       ) {
         return false;
       }
@@ -247,10 +202,10 @@ const renderExpenses = () => {
   // Clear the expense list
   expenseList.innerHTML = "";
 
-  // Show/hid no expense message
+  // Show/hide no expense message
   if (filteredExpenses.length === 0) {
     noExpensesMessage.style.display = "block";
-    document.getElementById("expenses-table").style.display = "none";
+    document.getElementById("expense-table").style.display = "none";
 
     // Update message based on whether there are any expenses
     if (expenses.length === 0) {
@@ -261,7 +216,7 @@ const renderExpenses = () => {
     }
   } else {
     noExpensesMessage.style.display = "none";
-    document.getElementById("expenses-table").style.display = "table";
+    document.getElementById("expense-table").style.display = "table";
 
     // Add expenses to the table
     filteredExpenses.forEach((expense) => {
@@ -319,13 +274,11 @@ const renderExpenses = () => {
 
       actionButtons.appendChild(editBtn);
       actionButtons.appendChild(deleteBtn);
-      actionButtons.appendChild(actionButtons);
+      actionCell.appendChild(actionButtons);
       row.appendChild(actionCell);
 
       expenseList.appendChild(row);
     });
-
-    expenseList.appendChild(row);
   }
 };
 
@@ -341,7 +294,7 @@ const updateSummary = () => {
   totalAmountEl.textContent = formatCurrency(totalAmount);
 
   // Update expense count
-  expenseCountEl.textContent = `${filteredExpenses.length} expenses ${
+  expenseCountEl.textContent = `${filteredExpenses.length} expense${
     filteredExpenses.length !== 1 ? "s" : ""
   }`;
 
@@ -380,175 +333,273 @@ const updateSummary = () => {
 };
 
 // Initializing charts
-const initCharts = () => {
-  // Category chart
-  categoryChart = new Chart(categoryChartCanvas, {
-    type: "pie",
-    data: {
-      labels: [],
-      datasets: [
-        {
-          data: [],
-          background: [],
-          borderWidth: 1,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false,
-        },
-        tooltip: {
-          callbacks: {
-            label: (context) => {
-              const label = context.label || "";
-              const value = context.raw || 0;
-              return `${label}: ${formatCurrency(value)}`;
-            },
-          },
-        },
-      },
-    },
+initCharts();
+
+//update charts
+updateCharts();
+// Add a new expense
+const addExpense = (expenseData) => {
+  const newExpense = {
+    id: Date.now().toString(),
+    ...expenseData,
+    amount: Number.parseFloat(expenseData.amount),
+  };
+
+  expenses.push(newExpense);
+  saveExpenses();
+  renderExpenses();
+  updateSummary();
+};
+
+// Update an existing expense
+const updateExpense = (id, updatedData) => {
+  const index = expenses.findIndex((expense) => expense.id === id);
+  if (index !== -1) {
+    expenses[index] = {
+      ...expenses[index],
+      ...updatedData,
+      amount: Number.parseFloat(updatedData.amount),
+    };
+
+    saveExpenses();
+    renderExpenses();
+    updateSummary();
+  }
+};
+
+// Delete an expense
+const deleteExpense = (id) => {
+  expenses = expenses.filter((expense) => expense.id !== id);
+  saveExpenses();
+  renderExpenses();
+  updateSummary();
+};
+
+// Add a new category
+const addCategory = (categoryData) => {
+  const newCategory = {
+    id: categoryData.name.toLowerCase().replace(/\s+/g, "-"),
+    ...categoryData,
+  };
+
+  categories.push(newCategory);
+  saveCategories();
+  populateCategoryDropdowns();
+};
+
+// Open edit modal
+const openEditModal = (expense) => {
+  document.getElementById("edit-id").value = expense.id;
+  document.getElementById("edit-amount").value = expense.amount;
+  document.getElementById("edit-category").value = expense.category;
+  document.getElementById("edit-description").value = expense.description;
+  document.getElementById("edit-date").value = expense.date;
+
+  editModal.style.display = "block";
+};
+
+// Open delete modal
+const openDeleteModal = (id) => {
+  document.getElementById("delete-id").value = id;
+  deleteModal.style.display = "block";
+};
+
+// Close all modals
+const closeModals = () => {
+  if (categoryModal) categoryModal.style.display = "none";
+  if (editModal) editModal.style.display = "none";
+  if (deleteModal) deleteModal.style.display = "none";
+};
+
+// Setup event listeners
+const setupEventListeners = () => {
+  // Expense form submission
+  expenseForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const expenseData = {
+      amount: document.getElementById("amount").value,
+      category: document.getElementById("category").value,
+      description: document.getElementById("description").value,
+      date: document.getElementById("date").value,
+    };
+
+    addExpense(expenseData);
+    this.reset();
+    document.getElementById("date").valueAsDate = new Date();
   });
 
-  // Monthly chart
-  monthlyChart = new Chart(monthlyChartCanvas, {
-    type: "bar",
-    data: {
-      labels: [],
-      datasets: [
-        {
-          label: "Monthly Expenses",
-          data: [],
-          background: "rgba(99, 102, 241, 0.8)",
-          borderColor: "rgba(99, 102, 241, 1)",
-          borderWidth: 1,
-        },
-      ],
-    },
+  // Add category button
+  addCategoryBtn.addEventListener("click", () => {
+    categoryModal.style.display = "block";
+  });
 
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            callback: (value) => "₦" + value,
-          },
-        },
-      },
-      plugins: {
-        tooltip: {
-          callbacks: {
-            label: (context) => {
-              const label = context.dataset.label || "";
-              const value = ContentVisibilityAutoStateChangeEvent.raw || 0;
-              return `${label}: ${formatCurrency(value)}`;
-            },
-          },
-        },
-      },
-    },
+  // Category form submission
+  categoryForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const categoryData = {
+      name: document.getElementById("category-name").value,
+      color: document.getElementById("category-color").value,
+    };
+
+    addCategory(categoryData);
+    this.reset();
+    categoryModal.style.display = "none";
+  });
+
+  // Color input change
+  colorInput.addEventListener("input", () => {
+    colorPreview.style.background = this.value;
+  });
+
+  // Initialize color preview
+  colorPreview.style.background = colorInput.value;
+
+  // Edit form submission
+  editForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const id = document.getElementById("edit-id").value;
+    const updatedData = {
+      amount: document.getElementById("edit-amount").value,
+      category: document.getElementById("edit-category").value,
+      description: document.getElementById("edit-description").value,
+      date: document.getElementById("edit-date").value,
+    };
+
+    updateExpense(id, updatedData);
+    editModal.style.display = "none";
   });
 };
 
-// Update charts with current data
-const updateCharts = () => {
-  const filteredExpenses = getFilteredExpenses();
+// Confirm delete button
+confirmDeleteBtn.addEventListener("click", () => {
+  const id = document.getElementById("delete-id").value;
+  deleteExpense(id);
+  deleteModal.style.display = "none";
+});
 
-  // Update category chart
-  const categoryData = {};
-  filteredExpenses.forEach((expense) => {
-    if (categoryData[expense.category]) {
-      categoryData[expense.category] += Number.parseFloat(expense.amount);
-    } else {
-      categoryData[expense.category] = Number.parseFloat(expense.amount);
+// Cancel delete button
+cancelDeleteBtn.addEventListener("click", () => {
+  deleteModal.style.display = "none";
+});
+
+// close buttons for modals
+closeButtons.forEach((button) => {
+  button.addEventListener("click", closeModals);
+});
+
+// Close modals when cclicking outside
+window.addEventListener("click", (e) => {
+  if (
+    e.target === categoryModal ||
+    e.target === editModal ||
+    e.target === deleteModal
+  ) {
+    closeModals();
+  }
+});
+
+// Tab buttons
+tabBtns.forEach((button) => {
+  button.addEventListener("click", () => {
+    const tabId = this.getAttribute("data-tab");
+
+    // Update active tab button
+    tabBtns.forEach((btn) => btn.classList.remove("active"));
+    this.classList.add("active");
+
+    // Show active tab pane
+    tabPanes.forEach((pane) => pane.classList.remove("active"));
+    document.getElementById(`${tabId}-view`).classList.add("active");
+
+    // Update charts if chart view is showing
+    if (tabId === "chart") {
+      updateCharts();
     }
   });
+  // Chart tab buttons
+  chartTabBtns.forEach((button) => {
+    button.addEventListener("click", function () {
+      const chartId = this.getAttribute("data-chart");
 
-  const categoryLabels = [];
-  const categoryValues = [];
-  const categoryColors = [];
+      // Update active chart tab button
+      chartTabBtns.forEach((btn) => btn.classList.remove("active"));
+      this.classList.add("active");
 
-  for (const [categoryId, amount] of Object.entries(categoryData)) {
-    categoryLabels.push(getCategoryName(categoryId));
-    categoryValues.push(amount);
-    categoryColors.push(getCategoryColor(categoryId));
-  }
+      // Show active chart
+      if (chartId === "category") {
+        categoryChartCanvas.style.display = "block";
+        monthlyChartCanvas.style.display = "none";
+      } else {
+        categoryChartCanvas.style.display = "none";
+        monthlyChartCanvas.style.display = "block";
+      }
 
-  categoryChart.data.labels = categoryLabels;
-  categoryChart.data.datasets[0].data = categoryValues;
-  categoryChart.data.datasets[0].background = categoryColors;
-  categoryChart.update();
-
-  // Update chart legend
-  chartLegend.innerHTML = "";
-  if (categoryLabels.length > 0) {
-    categoryLabels.forEach((label, index) => {
-      const legendItem = document.createElement("div");
-      legendItem.className = "legend-item";
-
-      const colorLabel = document.createElement("div");
-      colorLabel.className = "legend-color";
-
-      const dot = document.createElement("div");
-      dot.className = "legend-dot";
-      dot.style.background = categoryColors[index];
-
-      const name = document.createElement("span");
-      name.textContent = label;
-
-      colorLabel.appendChild(dot);
-      colorLabel.appendChild(name);
-
-      const value = document.createElement("span");
-      value.textContent = formatCurrency(categoryValues[index]);
-
-      legendItem.appendChild(colorLabel);
-      legendItem.appendChild(value);
-
-      chartLegend.appendChild(legendItem);
+      // Update charts
+      updateCharts();
     });
-  }
-
-  // Update monthly chart
-  const monthlyData = {};
-  filteredExpenses.forEach((expense) => {
-    const date = new Date(expense.date);
-    const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
-
-    if (monthlyData[monthYear]) {
-      monthlyData[monthYear] += Number.parseFloat(expense.amount);
-    } else {
-      monthlyData[monthYear] = Number.parseFloat(expense.amount);
-    }
   });
 
-  const monthlyLabels = [];
-  const monthlyValues = [];
-
-  // Sorting by date
-  const sortedMonths = Object.keys(monthlyData).sort();
-
-  sortedMonths.forEach((monthYear) => {
-    const [year, month] = monthYear.split("-");
-    const date = new Date(Number.parseInt(year), Number.parseInt(month) - 1, 1);
-    const label = date.toLocaleDateString("en-NG", {
-      month: "short",
-      year: "numeric",
-    });
-
-    monthlyLabels.push(label);
-    monthlyValues.push(monthlyData[monthYear]);
+  // Search input
+  searchInput.addEventListener("input", function () {
+    searchTerm = this.value;
+    renderExpenses();
+    updateSummary();
   });
 
-  monthlyChart.data.labels = monthlyLabels;
-  monthlyChart.data.datasets[0].data = monthlyValues;
-  monthlyChart.update();
+  // Category filter
+  categoryFilterEl.addEventListener("change", function () {
+    activeFilter = this.value;
+    renderExpenses();
+    updateSummary();
+  });
+
+  // Date range filters
+  dateFromInput.addEventListener("change", function () {
+    dateRange.from = this.value ? new Date(this.value) : null;
+    renderExpenses();
+    updateSummary();
+  });
+
+  dateToInput.addEventListener("change", function () {
+    dateRange.to = this.value ? new Date(this.value) : null;
+    renderExpenses();
+    updateSummary();
+  });
+
+  // Clear date filter
+  clearDateFilterBtn.addEventListener("click", () => {
+    dateRange = { from: null, to: null };
+    dateFromInput.value = "";
+    dateToInput.value = "";
+    renderExpenses();
+    updateSummary();
+  });
+});
+
+const init = () => {
+  // Setting date as default for date inputs
+  document.getElementById("date").valueAsDate = new Date();
+
+  // Load data from localStorage
+  loadData();
+
+  // Populates category dropdowns
+  populateCategoryDropdowns();
+
+  // Rendering expenses
+  renderExpenses();
+
+  // Update summary
+  updateSummary();
+
+  // Initialize charts
+  initCharts();
+
+  //Setup event listeners
+  setupEventListeners();
 };
 
 // Initialize the app when the DOM is loaded

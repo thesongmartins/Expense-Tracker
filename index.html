@@ -2,27 +2,30 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="./src/style.css" />
     <title>Expense Tracker</title>
+    <link rel="stylesheet" href="/src/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
   </head>
   <body>
     <div class="container">
       <h1>Expense Tracker</h1>
 
-      <!-- Left Side - Add Expense form -->
       <div class="app-container">
+        <!-- Left side - Add Expense Form -->
         <div class="form-container">
           <h2>Add New Expense</h2>
           <form id="expense-form">
             <div class="form-group">
-              <label for="amount">Amount (₦)</label>
+              <label for="amount">Amount ($)</label>
               <input
                 type="number"
                 id="amount"
-                step="0.1"
-                min="0.1"
+                step="0.01"
+                min="0.01"
                 required
                 placeholder="0.00"
               />
@@ -30,9 +33,10 @@
 
             <div class="form-group">
               <label for="category">Category</label>
-              <div class="select-wth-button">
-                <select name="category" id="category">
-                  <option value="" disabled selected>Select a Category</option>
+              <div class="select-with-button">
+                <select id="category" required>
+                  <option value="" disabled selected>Select a category</option>
+                  <!-- Categories will be populated by JavaScript -->
                 </select>
                 <button type="button" id="add-category-btn" class="icon-button">
                   <i class="fas fa-plus"></i>
@@ -41,9 +45,8 @@
             </div>
 
             <div class="form-group">
-              <label for="description">description</label>
+              <label for="description">Description</label>
               <textarea
-                name="description"
                 id="description"
                 required
                 placeholder="What was this expense for?"
@@ -53,9 +56,9 @@
             <div class="form-group">
               <label for="date">Date</label>
               <input type="date" id="date" required />
-
-              <button type="submit" class="btn btn-primary">Add Expense</button>
             </div>
+
+            <button type="submit" class="btn btn-primary">Add Expense</button>
           </form>
         </div>
 
@@ -64,39 +67,39 @@
           <!-- Summary Cards -->
           <div class="summary-container">
             <div class="summary-card">
-              <h3>Total Expense</h3>
-              <p id="total-amount">₦0.00</p>
+              <h3>Total Expenses</h3>
+              <p id="total-amount">$0.00</p>
               <small id="expense-count">0 expenses</small>
             </div>
 
             <div class="summary-card">
               <h3>Top Category</h3>
               <p id="top-category">N/A</p>
-              <small id="top-category-amount">NGN0.00</small>
+              <small id="top-category-amount">$0.00</small>
             </div>
 
             <div class="summary-card">
               <h3>Average Expense</h3>
-              <p id="average-expense">₦0.00</p>
+              <p id="average-expense">$0.00</p>
               <small>Per transaction</small>
             </div>
           </div>
 
-          <!-- Filters -->
+          <!-- Filter Controls -->
           <div class="filter-container">
             <div class="filter-group">
               <label for="category-filter">Filter by:</label>
-              <select name="category-filter" id="category-filter">
+              <select id="category-filter">
                 <option value="all">All Categories</option>
+                <!-- Categories will be populated by JavaScript -->
               </select>
             </div>
 
             <div class="filter-group">
               <label for="date-filter">Date Range:</label>
               <div class="date-range">
-                <input type="date" id="date-from" placeholder="From" /><span
-                  >to</span
-                >
+                <input type="date" id="date-from" placeholder="From" />
+                <span>to</span>
                 <input type="date" id="date-to" placeholder="To" />
                 <button id="clear-date-filter" class="btn btn-small">
                   Clear
@@ -105,7 +108,7 @@
             </div>
 
             <div class="filter-group">
-              <label for="search"> Search: </label>
+              <label for="search">Search:</label>
               <input type="text" id="search" placeholder="Search expenses..." />
             </div>
           </div>
@@ -119,8 +122,8 @@
           <!-- Tab Content -->
           <div class="tab-content">
             <!-- List View -->
-            <div class="list-view" class="tab-pane active">
-              <table id="expense-table">
+            <div id="list-view" class="tab-pane active">
+              <table id="expenses-table">
                 <thead>
                   <tr>
                     <th>Date</th>
@@ -131,7 +134,7 @@
                   </tr>
                 </thead>
                 <tbody id="expense-list">
-                  <!-- Populated using Javascript -->
+                  <!-- Expenses will be populated by JavaScript -->
                 </tbody>
               </table>
               <div id="no-expenses-message" class="empty-message">
@@ -156,7 +159,7 @@
               </div>
 
               <div id="chart-legend" class="chart-legend">
-                <!-- Populated using Javascript -->
+                <!-- Legend will be populated by JavaScript -->
               </div>
             </div>
           </div>
@@ -169,7 +172,7 @@
       <div class="modal-content">
         <span class="close">&times;</span>
         <h2>Add New Category</h2>
-        <form action="category-form">
+        <form id="category-form">
           <div class="form-group">
             <label for="category-name">Category Name</label>
             <input
@@ -201,7 +204,7 @@
         <form id="edit-form">
           <input type="hidden" id="edit-id" />
           <div class="form-group">
-            <label for="edit-amount">Amount (₦)</label>
+            <label for="edit-amount">Amount ($)</label>
             <input
               type="number"
               id="edit-amount"
@@ -249,10 +252,8 @@
         </div>
       </div>
     </div>
-    <script
-      src="https://kit.fontawesome.com/5885fdb321.js"
-      crossorigin="anonymous"
-    ></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
