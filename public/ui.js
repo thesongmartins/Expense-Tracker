@@ -51,27 +51,27 @@ function generateID() {
 }
 
 // // Calculate total income
-// export function calculateIncome(transactions) {
-//   return transactions
-//     .filter((transaction) => transaction.amount > 0)
-//     .reduce((acc, transaction) => acc + transaction.amount, 0)
-//     .toFixed(2);
-// }
+export function calculateIncomee(transactions) {
+  return transactions
+    .filter((transaction) => transaction.amount > 0)
+    .reduce((acc, transaction) => acc + transaction.amount, 0)
+    .toFixed(2);
+}
 
 // // Calculate total expense
-// export function calculateExpense(transactions) {
-//   return transactions
-//     .filter((transaction) => transaction.amount < 0)
-//     .reduce((acc, transaction) => acc + Math.abs(transaction.amount), 0)
-//     .toFixed(2);
-// }
+export function calculateExpensee(transactions) {
+  return transactions
+    .filter((transaction) => transaction.amount < 0)
+    .reduce((acc, transaction) => acc + Math.abs(transaction.amount), 0)
+    .toFixed(2);
+}
 
 // // Calculate balance
-// export function calculateBalance(transactions) {
-//   return transactions
-//     .reduce((acc, transaction) => acc + transaction.amount, 0)
-//     .toFixed(2);
-// }
+export function calculateBalancee(transactions) {
+  return transactions
+    .reduce((acc, transaction) => acc + transaction.amount, 0)
+    .toFixed(2);
+}
 
 // Group transactions by category
 export function groupByCategory(transactions) {
@@ -123,7 +123,7 @@ export function initUI({
   // Add transaction form
   const form = document.getElementById("transaction-form");
   form.addEventListener("submit", (e) => {
-    // e.preventDefault();
+    e.preventDefault();
     console.log("Button clicked");
 
     const description = document.getElementById("description").value;
