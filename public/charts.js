@@ -1,6 +1,6 @@
-// import Chart from "chart.js/auto";
+import Chart from "chart.js/auto";
 // const { Chart } = await import("chart.js");
-import { Chart, PieController, ArcElement, Tooltip, Legend } from "chart.js";
+import { PieController, ArcElement, Tooltip, Legend } from "chart.js";
 
 Chart.register(PieController, ArcElement, Tooltip, Legend);
 
