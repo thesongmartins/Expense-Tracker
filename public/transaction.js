@@ -8,6 +8,7 @@ export function getTransactions() {
 // Add a transaction
 export function addTransaction(transaction) {
   const transactions = getStoredTransactions();
+  console.log('storage point', transaction)
 
   // Create a new transaction object with a unique ID
   const newTransaction = {
