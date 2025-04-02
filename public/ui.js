@@ -122,8 +122,15 @@ export function initUI({
 }) {
   // Add transaction form
   const form = document.getElementById("transaction-form");
+  const submitButton = form.querySelector('button[type="submit"]');
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
+
+    // Prevent multiple submissions
+    if (submitButton.disabled) return;
+    submitButton.disabled = true;
+
     console.log("Button clicked");
 
     const description = document.getElementById("description").value;
@@ -133,9 +140,13 @@ export function initUI({
 
     onAddTransaction({ description, amount, category, date });
 
-    // Reset form
+    // Reset form and re-enable button
     form.reset();
+    setTimeout(() => {
+      submitButton.disabled = false;
+    }, 500); // Small delay to prevent accidental double clicks
   });
+
 
   // Set today's date as default
   const dateInput = document.getElementById("date");
